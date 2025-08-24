@@ -21,6 +21,11 @@ function Library:CreateWindow(settings)
     settings = settings or DefaultSettings
     local window = setmetatable({}, Window)
     
+    if not game or not game.Players or not game.Players.LocalPlayer or not game.Players.LocalPlayer.PlayerGui then
+        warn("Cannot initialize UI: PlayerGui not accessible")
+        return nil
+    end
+    
     window.MainFrame = Instance.new("ScreenGui")
     window.MainFrame.Name = settings.WindowName or DefaultSettings.WindowName
     window.MainFrame.Parent = game.Players.LocalPlayer.PlayerGui
@@ -520,6 +525,7 @@ function Window:SetKeybind(settings)
     local connection
     
     local function toggleGui()
+        if not self.MainFrame then return end
         self.MainFrame.Enabled = not self.MainFrame.Enabled
         local targetTransparency = self.MainFrame.Enabled and 0.3 or 1
         local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
@@ -541,7 +547,9 @@ function Window:SetKeybind(settings)
             keybind = newKey
         end,
         Disconnect = function()
-            connection:Disconnect()
+            if connection then
+                connection:Disconnect()
+            end
         end
     }
 end
